@@ -1,10 +1,10 @@
-package com.zeromh.stablehash;
+package com.zeromh.consistenthash;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class StablehashApplicationTests {
+class ConsistenthashApplicationTests {
 
     @Test
     void contextLoads() {
