@@ -1,4 +1,4 @@
-# 5.Stable-hash
+# 5. Consistent-hash
 
 5장 안정해시에 대한 구현 과제입니다.  
 notion: https://weak-delphinium-fcf.notion.site/5-f140c258a5e94093bfa9f5953de168d8?pvs=4
