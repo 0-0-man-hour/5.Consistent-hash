@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.zeromh.stablehash.adapter.DefaultHashAdapterTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2024-05-30T14:04:38" hostname="hiyeopui-noteubug.local" time="0.384">
-  <properties/>
-  <testcase name="getIndex()" classname="com.zeromh.stablehash.adapter.DefaultHashAdapterTest" time="0.384"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/stablehash.iml" filepath="$PROJECT_DIR$/.idea/modules/stablehash.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/stablehash.main.iml" filepath="$PROJECT_DIR$/.idea/modules/stablehash.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/stablehash.test.iml" filepath="$PROJECT_DIR$/.idea/modules/stablehash.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/consistenthash.main.iml" filepath="$PROJECT_DIR$/.idea/modules/consistenthash.main.iml" />
     </modules>
   </component>
 </project>
