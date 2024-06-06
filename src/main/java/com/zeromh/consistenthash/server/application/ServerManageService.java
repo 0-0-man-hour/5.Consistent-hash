@@ -41,6 +41,8 @@ public class ServerManageService implements ServerManageUseCase {
     @Override
     public ServerStatus deleteServer(HashServer hashServer) {
         ServerStatus serverStatus = serverPort.getServerStatus();
+        if (serverStatus.getServerNums() < 2) throw new RuntimeException("서버가 1개 이하이므로 삭제할 수 없습니다.");
+
         ServerUpdateInfo updateInfo = hashServicePort.deleteServerInfo(serverStatus, hashServer);
 
         rehashServerAll(updateInfo.getRehashServer());
@@ -72,8 +74,10 @@ public class ServerManageService implements ServerManageUseCase {
         List<HashKey> keys = new ArrayList<>();
         for (var fromSever : rehashServers) {
             var rehashKeys = serverPort.getAllServerData(fromSever);
-            serverPort.delDataList(fromSever, rehashKeys);;
-            keys.addAll(rehashKeys);
+            if (rehashKeys != null) {
+                serverPort.delDataList(fromSever, rehashKeys);
+                keys.addAll(rehashKeys);
+            }
         }
 
         var serverMap = keys.stream().collect(Collectors.groupingBy(hashServicePort::getServer));

@@ -1,8 +1,15 @@
 spring:
   application:
-    name: stablehash
+    name: consistentHash
 
 hash:
-  function: md5
-  consistent: true
-  replica-nums: 3
+  function: custom #md5
+  consistent: false
+  replica-nums: 1
+
+server:
+  infra: mongo
+  host: localhost
+logging:
+  level:
+    root: info

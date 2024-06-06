@@ -6,6 +6,7 @@ import com.zeromh.consistenthash.domain.HashServer;
 import com.zeromh.consistenthash.server.port.out.ServerPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -16,6 +17,7 @@ import java.util.List;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "server.infra", havingValue = "mongo")
 public class MongoServerAdapter implements ServerPort {
     private final MongoTemplate mongoTemplate;
     private static final String SERVER_STATUS = "Sever_Status";

@@ -1,8 +1,0 @@
-spring:
-  application:
-    name: stablehash
-
-hash:
-  function: md5
-  consistent: true
-  replica-nums: 3
