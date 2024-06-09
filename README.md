@@ -60,7 +60,9 @@ notion: https://weak-delphinium-fcf.notion.site/5-f140c258a5e94093bfa9f5953de168
             └── util
                 └── DateUtil.java
 ```
+해당 구조는 헥사고날 아키텍처를 기반으로 설계했으며 [지속 가능한 소프트웨어 설계 패턴: 포트와 어댑터 아키텍처 적용하기](https://engineering.linecorp.com/ko/blog/port-and-adapter-architecture) 를 참고하였다.
 
+//사진 추가 예정
 
 ### 주요 기능
 
