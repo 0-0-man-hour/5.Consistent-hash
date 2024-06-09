@@ -1,8 +1,8 @@
 package com.zeromh.consistenthash.adapter;
 
-import com.zeromh.consistenthash.domain.ServerStatus;
-import com.zeromh.consistenthash.domain.HashServer;
-import com.zeromh.consistenthash.server.adapter.MongoServerAdapter;
+import com.zeromh.consistenthash.application.dto.ServerStatus;
+import com.zeromh.consistenthash.domain.model.server.HashServer;
+import com.zeromh.consistenthash.domain.model.server.mongo.MongoServerAdapter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

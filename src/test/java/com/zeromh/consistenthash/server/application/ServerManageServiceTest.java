@@ -1,14 +1,14 @@
 package com.zeromh.consistenthash.server.application;
 
-import com.zeromh.consistenthash.domain.HashKey;
-import com.zeromh.consistenthash.domain.HashServer;
-import com.zeromh.consistenthash.domain.ServerStatus;
-import com.zeromh.consistenthash.hash.application.KeyManageService;
-import com.zeromh.consistenthash.hash.dto.KeyServerDto;
-import com.zeromh.consistenthash.server.port.out.ServerPort;
+import com.zeromh.consistenthash.application.impl.ServerManageService;
+import com.zeromh.consistenthash.domain.model.key.HashKey;
+import com.zeromh.consistenthash.domain.model.server.HashServer;
+import com.zeromh.consistenthash.application.dto.ServerStatus;
+import com.zeromh.consistenthash.application.impl.KeyManageService;
+import com.zeromh.consistenthash.application.dto.KeyServerDto;
+import com.zeromh.consistenthash.domain.model.server.ServerPort;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

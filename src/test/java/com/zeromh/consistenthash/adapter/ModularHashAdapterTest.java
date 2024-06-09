@@ -1,10 +1,10 @@
 package com.zeromh.consistenthash.adapter;
 
-import com.zeromh.consistenthash.domain.ServerStatus;
-import com.zeromh.consistenthash.domain.HashKey;
-import com.zeromh.consistenthash.domain.HashServer;
-import com.zeromh.consistenthash.hash.adapter.ModularHashAdapter;
-import com.zeromh.consistenthash.hash.port.out.HashFunction;
+import com.zeromh.consistenthash.application.dto.ServerStatus;
+import com.zeromh.consistenthash.domain.model.key.HashKey;
+import com.zeromh.consistenthash.domain.model.server.HashServer;
+import com.zeromh.consistenthash.domain.service.hash.impl.ModularHashAdapter;
+import com.zeromh.consistenthash.domain.model.hash.HashFunction;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
