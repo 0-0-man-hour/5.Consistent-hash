@@ -2,6 +2,7 @@ package com.zeromh.consistenthash.hash.application;
 
 import com.zeromh.consistenthash.domain.HashKey;
 import com.zeromh.consistenthash.domain.HashServer;
+import com.zeromh.consistenthash.hash.dto.KeyServerDto;
 import com.zeromh.consistenthash.hash.port.out.HashServicePort;
 import com.zeromh.consistenthash.hash.port.in.KeyManageUseCase;
 import com.zeromh.consistenthash.server.port.out.ServerPort;
@@ -32,9 +33,12 @@ public class KeyManageService implements KeyManageUseCase {
     }
 
     @Override
-    public HashKey getKey(HashKey key) {
+    public KeyServerDto getKey(HashKey key) {
         HashServer targetServer = getSever(key);
-        return serverPort.getKey(key, targetServer);
+        return KeyServerDto.builder()
+                .server(targetServer)
+                .hashKey(serverPort.getKey(key, targetServer))
+                .build();
     }
 
     private HashServer getSever(HashKey key) {

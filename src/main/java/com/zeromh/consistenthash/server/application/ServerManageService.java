@@ -25,10 +25,10 @@ public class ServerManageService implements ServerManageUseCase {
     private final HashServicePort hashServicePort;
 
     @Override
-    public ServerStatus addServer() {
+    public ServerStatus addServer(String serverName) {
         ServerStatus serverStatus = serverPort.getServerStatus();
 
-        ServerUpdateInfo updateInfo = hashServicePort.addServerInfo(serverStatus);
+        ServerUpdateInfo updateInfo = hashServicePort.addServerInfo(serverStatus, serverName);
         serverStatus = serverPort.addServer(updateInfo.getNewServer());
 
         if(updateInfo.getRehashServer() != null) {
@@ -51,6 +51,7 @@ public class ServerManageService implements ServerManageUseCase {
 
         return serverStatus;
     }
+
 
     private void rehashServer(List<HashServer> rehashServers) {
         for(var fromServer : rehashServers) {

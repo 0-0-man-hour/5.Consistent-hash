@@ -11,7 +11,7 @@ public interface HashServicePort {
     void setServer(ServerStatus serverStatus);
 
     HashServer getServer(HashKey key);
-    ServerUpdateInfo addServerInfo(ServerStatus serverStatus);
+    ServerUpdateInfo addServerInfo(ServerStatus serverStatus, String serverName);
     ServerUpdateInfo deleteServerInfo(ServerStatus serverStatus, HashServer server);
 
 }

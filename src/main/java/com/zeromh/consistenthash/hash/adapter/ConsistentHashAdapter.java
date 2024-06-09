@@ -63,12 +63,15 @@ public class ConsistentHashAdapter implements HashServicePort {
         return ring.get(hash);
     }
 
-    public ServerUpdateInfo addServerInfo(ServerStatus serverStatus) {
+    public ServerUpdateInfo addServerInfo(ServerStatus serverStatus, String serverName) {
         setServer(serverStatus);
-        String newServerName = DateUtil.getNowDate();
+        if (serverName == null) {
+            serverName = DateUtil.getNowDate();
+        }
 
+        String finalServerName = serverName;
         List<Long> newServerHashes = IntStream.range(0,numsOfReplicas)
-                .mapToObj(i -> hashFunction.hash(newServerName + i))
+                .mapToObj(i -> hashFunction.hash(finalServerName + i))
                 .toList();
 
 
@@ -85,7 +88,7 @@ public class ConsistentHashAdapter implements HashServicePort {
 
 
         HashServer newServer = HashServer.builder()
-                .name(newServerName)
+                .name(serverName)
                 .hashValues(newServerHashes)
                 .build();
 

@@ -3,6 +3,7 @@ package com.zeromh.consistenthash.hash.presentation;
 import com.zeromh.consistenthash.domain.HashKey;
 import com.zeromh.consistenthash.domain.HashServer;
 import com.zeromh.consistenthash.hash.dto.HashKeyRequestDto;
+import com.zeromh.consistenthash.hash.dto.KeyServerDto;
 import com.zeromh.consistenthash.hash.port.in.KeyManageUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -20,9 +21,8 @@ public class KeyController {
     }
 
     @GetMapping("/key/{key}")
-    public HashKey getKey(@PathVariable String key) {
-        HashKey hashKey = keyManageUseCase.getKey(HashKey.builder()
+    public KeyServerDto getKey(@PathVariable String key) {
+        return keyManageUseCase.getKey(HashKey.builder()
                 .key(key).build());
-        return hashKey;
     }
 }

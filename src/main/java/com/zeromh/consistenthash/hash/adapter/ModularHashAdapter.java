@@ -8,11 +8,12 @@ import com.zeromh.consistenthash.hash.port.out.HashFunction;
 import com.zeromh.consistenthash.hash.port.out.HashServicePort;
 import com.zeromh.consistenthash.util.DateUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-
+@Slf4j
 @Component
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "hash.consistent", havingValue = "false")
@@ -36,20 +37,21 @@ public class ModularHashAdapter implements HashServicePort {
 
     @Override
     public HashServer getServer(HashKey key) {
+        if (serverNums == 0) return null;
         long hashKey = hashFunction.hash(key.getKey());
         key.setHashVal((int) (hashKey % serverNums));
         return serverMap.get((int) (hashKey % serverNums));
     }
 
     @Override
-    public ServerUpdateInfo addServerInfo(ServerStatus serverStatus) {
+    public ServerUpdateInfo addServerInfo(ServerStatus serverStatus, String serverName) {
         setServer(serverStatus);
         serverNums++;
         HashServer server = HashServer.builder()
-                .name(DateUtil.getNowDate())
+                .name(serverName == null ? DateUtil.getNowDate() : serverName)
                 .hashValues(List.of((long) serverNums))
                 .build();
-        serverMap.put(serverNums, server);
+        serverMap.put(serverNums-1, server);
 
         return ServerUpdateInfo
                 .builder()

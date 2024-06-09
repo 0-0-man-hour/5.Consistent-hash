@@ -4,6 +4,6 @@ import com.zeromh.consistenthash.domain.ServerStatus;
 import com.zeromh.consistenthash.domain.HashServer;
 
 public interface ServerManageUseCase {
-    ServerStatus addServer();
+    ServerStatus addServer(String serverName);
     ServerStatus deleteServer(HashServer hashServer);
 }

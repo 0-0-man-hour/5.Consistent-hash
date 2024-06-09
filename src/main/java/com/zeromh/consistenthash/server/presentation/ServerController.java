@@ -16,8 +16,8 @@ public class ServerController {
     private final ServerManageUseCase serverManageUseCase;
 
     @PostMapping(path = "/server")
-    public ServerStatus addServer() {
-        return serverManageUseCase.addServer();
+    public ServerStatus addServer(@RequestBody ServerRequestDto requestDto) {
+        return serverManageUseCase.addServer(requestDto.getServerName());
     }
 
     @DeleteMapping(path = "/server")

@@ -1,14 +1,17 @@
 spring:
+  data:
+    mongodb:
+      database: consistent
   application:
     name: consistentHash
 
 hash:
-  function: custom #md5
-  consistent: false
-  replica-nums: 1
+  function: md5 #custom
+  consistent: true
+  replica-nums: 100
 
 server:
-  infra: mongo
+  infra: redis
   host: localhost
 logging:
   level:

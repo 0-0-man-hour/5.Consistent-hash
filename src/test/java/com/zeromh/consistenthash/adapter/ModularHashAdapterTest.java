@@ -59,7 +59,7 @@ class ModularHashAdapterTest {
                 .serverNums(3)
                 .serverList(serverList).build();
 
-        Assertions.assertThat(modularHashAdapter.addServerInfo(serverStatus)
+        Assertions.assertThat(modularHashAdapter.addServerInfo(serverStatus, null)
                 .getNewServer()
                 .getHashValues().get(0)).isEqualTo(4);
 
