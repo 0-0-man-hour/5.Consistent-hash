@@ -1,0 +1,18 @@
+spring:
+  data:
+    mongodb:
+      database: consistent
+  application:
+    name: consistentHash
+
+hash:
+  function: md5 #custom
+  consistent: true
+  replica-nums: 100
+
+server:
+  infra: redis
+  host: localhost
+logging:
+  level:
+    root: info
