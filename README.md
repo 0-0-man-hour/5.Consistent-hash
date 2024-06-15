@@ -1,8 +1,7 @@
 # 5. Consistent-hash
 
 5장 안정해시에 대한 구현 과제입니다.  
-notion: https://weak-delphinium-fcf.notion.site/5-f140c258a5e94093bfa9f5953de168d8?pvs=4
-
+notion: https://0manhour.notion.site/5-f140c258a5e94093bfa9f5953de168d8?pvs=4  
 담당자: 박상엽(park-sy)  
 
 |Week|Date|Desc|
@@ -61,18 +60,32 @@ notion: https://weak-delphinium-fcf.notion.site/5-f140c258a5e94093bfa9f5953de168
             └── util
                 └── DateUtil.java
 ```
-해당 구조는 헥사고날 아키텍처를 기반으로 설계했으며 [지속 가능한 소프트웨어 설계 패턴: 포트와 어댑터 아키텍처 적용하기](https://engineering.linecorp.com/ko/blog/port-and-adapter-architecture)와 클린 아키텍처 도서를 참고하였다.
+해당 구조는 헥사고날 아키텍처를 기반으로 설계했으며 [지속 가능한 소프트웨어 설계 패턴: 포트와 어댑터 아키텍처 적용하기](https://engineering.linecorp.com/ko/blog/port-and-adapter-architecture)와 클린 아키텍처 도서를 참고하였다.  
+![image](https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/93bc8a21-dbc8-4709-9f0a-dda495d4e3fb)
 
-//사진 추가 예정
 
-API 또는 내부 컴포넌트를 호출하여 서버/키 관리 serveice에 접근하여, 서버와 키를 추가/제거 할 수 있다.  
-서버는 논리적인 흐름을 보기 위하여 mongodb를 활용하여 서버의 상태 저장, key 배치 등을 확인한다.  
-실제로는 서버 추가/제거 시 redis container를 docker를 활용하여 띄우고 key를 각 container에 저장하도록 한다.  
-서버의 변경, 해시 알고리즘 변경, virtual node의 변경 등은 코드 수정 없이 application.yml에서 값을 조정하여 변경할 수 있다.
+- API 또는 내부 컴포넌트를 호출하여 서버/키 관리 serveice에 접근하여, 서버와 키를 추가/제거 할 수 있다.
+- 논리적인 흐름을 보기 위하여 mongodb를 활용하여 서버의 상태 저장, key 배치 등을 확인한다.
+- 물리적으로는 redis를 사용하여 서버 추가/제거 시 redis container를 docker를 활용하여 띄우고 key를 각 container에 저장하도록 한다.
+- 서버의 변경, 해시 알고리즘 변경, virtual node의 변경 등은 코드 수정 없이 application.yml에서 값을 조정하여 변경할 수 있다.
+``` yml
+hash:
+  function: md5 #custom
+  consistent: true #false
+  replica-nums: 100 #1, 4....
+
+server:
+  infra: redis # mongo
+  host: localhost
+logging:
+  level:
+    root: info
+
+```
 
 ### 주요 기능
 - 안정 해시를 통한 서버/키 설정
-```java.
+``` java
     public HashServer getServer(HashKey key) {
         if (ring.isEmpty()) {
             return null;
@@ -90,7 +103,7 @@ API 또는 내부 컴포넌트를 호출하여 서버/키 관리 serveice에 접
 ```
 안정 해시를 구현하기 위해서 SortedMap을 사용하였으며, hash value를 기반으로 정렬된 형태의 map을 구성하였다.  
 서버의 상태를 map에 저장하고, 조회 시에 tailMap을 통해 현재 value로 부터 가장 가까운 위치의 서버를 반환한다.  
-[참고-Consistent Hashing](https://tom-e-white.com/2007/11/consistent-hashing.html)
+[Consistent Hashing](https://tom-e-white.com/2007/11/consistent-hashing.html) 사이트를 참고하여 구현하였다. 
 
 - 서버 추가  
 
