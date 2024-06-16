@@ -72,34 +72,31 @@ notion: https://0manhour.notion.site/5-f140c258a5e94093bfa9f5953de168d8?pvs=4
 hash:
   function: md5 #custom
   consistent: true #false
-  replica-nums: 100 #1, 4....
+  node-nums: 100 #1, 4....
 
 server:
   infra: redis # mongo
   host: localhost
-logging:
-  level:
-    root: info
 
 ```
 
 ### 주요 기능
 - 안정 해시를 통한 서버/키 설정
 ``` java
-    public HashServer getServer(HashKey key) {
-        if (ring.isEmpty()) {
-            return null;
-        }
-
-        long hash = hashFunction.hash(key.getKey());
-        key.setHashVal(hash);
-
-        if (!ring.containsKey(hash)) {
-            SortedMap<Long, HashServer> tailMap = ring.tailMap(hash);
-            hash = tailMap.isEmpty() ? ring.firstKey() : tailMap.firstKey();
-        }
-        return ring.get(hash);
+public HashServer getServer(HashKey key) {
+    if (ring.isEmpty()) {
+        return null;
     }
+
+    long hash = hashFunction.hash(key.getKey());
+    key.setHashVal(hash);
+
+    if (!ring.containsKey(hash)) {
+        SortedMap<Long, HashServer> tailMap = ring.tailMap(hash);
+        hash = tailMap.isEmpty() ? ring.firstKey() : tailMap.firstKey();
+    }
+    return ring.get(hash);
+}
 ```
 안정 해시를 구현하기 위해서 SortedMap을 사용하였으며, hash value를 기반으로 정렬된 형태의 map을 구성하였다.  
 서버의 상태를 map에 저장하고, 조회 시에 tailMap을 통해 현재 value로 부터 가장 가까운 위치의 서버를 반환한다.  
@@ -111,14 +108,17 @@ logging:
 1. 서버의 추가는 server의 이름을 해시 알고리즘을 통해 hashvalue를 계산한 후에 해시링에 배치한다.
 2. 배치된 해시링을 내부 map에 저장 한 후에 ServerPort를 거쳐 상태를 등록한다.  
     2-1. mongodb의 경우 논리적인 서버 상태가 저장된다.  
-    2-2. redis의 경우 server 이름을 기반으로한 컨테이너가 생성된다.  
+   ![mongo](https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/84abbd08-a6fc-440c-bf73-dd3cffeced39)
+
+    2-2. redis의 경우 server 이름을 기반으로한 컨테이너가 생성된다.
+    ![redis](https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/65f208d9-99ae-4c7a-b13d-ffea1132fe8b)
 3. rehash를 체크한 경우에 기존에 저장된 key들의 rehash가 이루어진다.
   
 - 서버 제거
 
 서버의 제거는 해시링에 등록된 server 정보를 제거하고, 외부 서버를 제거한다.
 1. 서버의 제거는 해시링에 배치된 서버의 데이터를 제거한다.
-2. 배치된 해시링을 내부 map에서 작제한 후에 ServerPort를 서버 정볼르 삭제한다.  
+2. 배치된 해시링을 내부 map에서 작제한 후에 ServerPort를 서버 정보를 삭제한다.  
     2-1. mongodb의 경우 논리적인 서버 상태를 삭제한다.  
     2-2. redis의 경우 server 이름 기반의 컨테이너를 제거한다.
 3. rehash를 체크한 경우 삭제 대상의 서버의 key를 rehahs하여 재배치한다.
@@ -131,6 +131,27 @@ logging:
 
 
 ### 사용방법
+#### 서버 구동 방법
+``` yml
+hash:
+  function: md5 #custom
+  consistent: true #false
+  node-nums: 100 #1, 4....
+
+server:
+  infra: redis # mongo
+  host: localhost
+
+```
+
+위 yml 파일에서 정보를 바꾸어 실행하여 사용할 수 있다.
+- function: md5, custom
+- consistent: true(안정해시 사용), false(모듈러 해싱 사용)
+- node-nums: virtual node의 수를 선택
+- infra: mongo(가상 서버 개념), redis(실제 서버 사용)
+
+*redis 사용 시 docker 설치가 필요*
+
 #### API 사용
 API를 통한 사용은 서버를 실행한 후 아래 API를 호출하여 사용한다.
 
@@ -147,26 +168,42 @@ API를 통한 사용은 서버를 실행한 후 아래 API를 호출하여 사�
 .jar 파일을 불러와 사용할 수 있다.
 consistentHashService를 불러온 뒤 각 메소드를 호출한다.
 
-|method|path|desc|
-|------|---|---|
-|ConsistentHashService.addServer()|/consistenthash/server|server를 추가한다.|
-|ConsistentHashService.delServer()|/consistenthash/server|server 제거한다.|
-|ConsistentHashService.getKey()|/consistenthash/key/{key}|key를 조회한다.|
-|ConsistentHashService.addKey()|/consistenthash/key|key를 추가한다.|
-|ConsistentHashService.delKey()|/consistenthash/key|key를 제거한다.|
+|method|desc|
+|------|---|
+|ConsistentHashService.addServer()|server를 추가한다.|
+|ConsistentHashService.delServer()|server 제거한다.|
+|ConsistentHashService.getKey()|key를 조회한다.|
+|ConsistentHashService.addKey()|key를 추가한다.|
+|ConsistentHashService.delKey()|key를 제거한다.|
 
+``` java
+@Service
+@RequiredArgsConstructor
+public class TestService {
+    private final ConsistentHashService hashService;
+    
+    public void test() {
+        hashService.addServer("myServer");
+        hashService.delServer("myServer");
+    }
+}
+```
 
 
 ### 테스트
+자세한 테스트 결과는 [5. 안정해시 테스트 결과](https://docs.google.com/spreadsheets/d/19TCaYxdEXc0qGslYcfGyjHuE0nQaXxMYe5e_cXF5M88/edit?usp=sharing)에서 확인할 수 있다.  
+
 #### Test Set
 - 테스트 서버의 기본값: 4개  
     - server의 이름은 server_{server.no}와 같으며,  virtual node의 수에 따라서 server_{server.no}{node.no}에 해시 알고리즘을 적용하여 해시값을 생성하였다.
-    - ex)server_00, server_01, server_10, server_11  
+    - ex)"server_00", "server_01", "server_10", "server_11"  
 - key의 개수: 100만개
-    - key 값은 0부터 999999까지의 숫자를 String 형태로 바꾸어 사용하였다.  
+    - key 값은 0부터 999999까지의 숫자를 String 형태로 바꾸어 사용하였다.
+    - ex) "0", "1", "2", ... ,"999999"
 - 해시 알고리즘: MD5
     - MD5는 총 16byte이므로 간단하게 사용하기 위해 prefix 부터 4byte까지 잘라 사용하였다.
-- 안정 해시의 virutal node 수: 1, 4, 10, 100개  
+- 안정 해시의 virutal node 수: 4개의 case  
+    - 1, 4, 10, 100개  
 
 위 테스트 설정을 토대로 안정 해시에 server를 생성하고, hash value를 적용하여 해시링에 위치하면 다음과 같다.
 
