@@ -23,7 +23,7 @@ public class ConsistentHashAdapter implements HashServicePort {
 
     private final HashFunction hashFunction;
 
-    @Value("${hash.replica-nums}")
+    @Value("${hash.node-nums}")
     private int numsOfReplicas;
     SortedMap<Long, HashServer> ring = new TreeMap<>();
 
