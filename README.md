@@ -131,6 +131,12 @@ public HashServer getServer(HashKey key) {
 
 
 ### 사용방법
+#### 사전 준비
+서버로 사용되는 mongodb와 redis의 사용을 위해서 먼저 docker의 설치가 필요하다.  
+- [docker 다운로드](https://www.docker.com/products/docker-desktop/)
+- shell에 명령어 입력 : docker pull mongo, docker pull mongo
+
+
 #### 서버 구동 방법
 ``` yml
 hash:
@@ -144,13 +150,13 @@ server:
 
 ```
 
-위 yml 파일에서 정보를 바꾸어 실행하여 사용할 수 있다.
+위 yml 파일에서 필요한 설정을 한 뒤에 application을 실행하여 사용할 수 있다.
 - function: md5, custom
 - consistent: true(안정해시 사용), false(모듈러 해싱 사용)
 - node-nums: virtual node의 수를 선택
 - infra: mongo(가상 서버 개념), redis(실제 서버 사용)
 
-*redis 사용 시 docker 설치가 필요*
+
 
 #### API 사용
 API를 통한 사용은 서버를 실행한 후 아래 API를 호출하여 사용한다.
