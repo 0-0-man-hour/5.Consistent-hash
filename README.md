@@ -213,10 +213,10 @@ public class TestService {
 
 위 테스트 설정을 토대로 안정 해시에 server를 생성하고, hash value를 적용하여 해시링에 위치하면 다음과 같다.
 
-<img src="https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/4d016a63-b8c2-48ec-ae09-9e942ec8b0bc" width="500"/>
-<img src="https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/0bba574e-be1f-402d-a2cb-ed092bde565b" width="500"/>
-<img src="https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/2be3e8fc-1524-457e-96af-7b81d6840e75" width="500"/>
-<img src="https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/6e1f3492-d11f-4e98-b5d1-92a8529f4a40" width="500"/>
+<img src="https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/4d016a63-b8c2-48ec-ae09-9e942ec8b0bc" width="400"/>
+<img src="https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/0bba574e-be1f-402d-a2cb-ed092bde565b" width="400"/>
+<img src="https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/2be3e8fc-1524-457e-96af-7b81d6840e75" width="400"/>
+<img src="https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/6e1f3492-d11f-4e98-b5d1-92a8529f4a40" width="400"/>
 
 
 #### 키 분포 확인
@@ -238,7 +238,7 @@ public class TestService {
 #### 서버 down 시 Cache Hit Rate  
 키 분포 확인 이후에 하나의 서버가 down 되었다 가정하고 cahce hit rate를 테스트하였다.  
 안정 해시/virtual node 1 일 때 key의 개수가 유독 적어 Server_3이 down 되었다 가정하였고, 나머지는 Server_0의 down으로 테스트하였다.  
-![스크린샷 2024-06-09 오후 9 41 03](https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/1d2a9b6e-6b19-49e7-8ab0-d73755df1a11)
+![image](https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/e9b296c3-8d96-4d08-96e6-128c3de95f0a)
 
 특정 서버 down 시의 cahce hit rate의 변화는 위와 같다.  
 - 모듈러 해싱의 경우 cahce miss의발생이 매우 증가하였다.
@@ -254,14 +254,15 @@ public class TestService {
 책에서는 다루지 않은 내용이지만, Server가 추가/제거될 때 데이터의 보존이 중요할 경우 Rehash 과정을 거쳐 알맞은 위치로 key를 이동시켜야 한다.  
 이 과정에서 key 이동 시간에는 서비스를 중단시켜야 하므로, 서비스의 만족도의 큰 영향을 미칠 수 있기 때문에 각 분배 해싱의 key 이동 시간을 비교해보았다.  
 
-![스크린샷 2024-06-09 오후 9 48 20](https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/ee71c6c6-e46e-4811-99e0-7e51fc220cd1)
+![image](https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/b424ed96-6832-4d7c-a481-41dc61cb200e)
 
 논리적 서버인 mongodb와 물리적 서버인 redis로 테스트 한 결과는 위와 같으며, local에서 container를 사용하여 측정하였기 때문에, 실제 값이 얼마인지 보다는 상대적으로 소요된 숫자를 비교하였다. 
 - 모듈러 해싱의 경우 Server 추가/제거에 대해서 모두 높은 시간을 보인다.  
 - 안정 해싱의 경우 virtual node 수가 1일 때를 제외하고, Server 추가는 모듈러 해싱과 비슷하게, Server 제거는 모듈러 해싱에 비해 줄어든 모습을 보인다.  
 
 각 시간이 차이나는 원인은 rehash 과정을 거치는 키의 개수와 관련이 있다.  
-![스크린샷 2024-06-09 오후 9 50 31](https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/7c4b5de8-a48d-409f-81c0-45b0f7096c13)  
+![image](https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/1c17f588-c953-4ddf-8a82-3b2582478c3d)  
+
 위 표를 살펴보면 Server_4가 추가되기 전후로 key의 증감을 확인할 수 있는데, 모듈러 해싱은 키의 증감과 상관없이 1M 개의 데이터를 모두 rehash 해야하기 때문에 증가/제거 모두 오랜 시간이 소요된다.  
 반면 안정 해싱의 경우엔 추가의 rehash 대상이 되는 Server에 대해서만 key를 rehash하면 되므로 제거 시에는 Server_4에 대해서만 진행하게 되고, virtual node 수가 1일 경우에는 증가 시에도 Server_3에 대해서만 진행하면 되기 때문에 시간이 적게 소요된다.  
 
