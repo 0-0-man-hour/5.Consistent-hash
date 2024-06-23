@@ -172,7 +172,26 @@ API를 통한 사용은 서버를 실행한 후 아래 API를 호출하여 사�
 
 #### 컴포넌트를 통한 사용(6장. 키값 저장소 설계 이후에 작성 예정입니다.)
 .jar 파일을 불러와 사용할 수 있다.
-consistentHashService를 불러온 뒤 각 메소드를 호출한다.
+
+해당 project를 jar로 빌드한 뒤 --- file을 경로에 저장한다.
+이후에 build.gradle에서 dependency에 다음과 같이 추가한뒤 library를 불러온다.
+
+``` gradle
+dependencies {
+    implementation files('libs/consistenthash-0.0.1-SNAPSHOT-plain.jar')
+}
+```
+이후 jar안의 빈을 사용하기 위해서 config class를 생성하여 프로젝트 안의 bean을 scan하여 사용한다.  
+
+``` java
+@Configuration
+@ComponentScan(basePackages = "com.zeromh.consistenthash")
+public class ConsistentConfig {
+}
+```
+
+
+다음엔 consistentHashService를 불러온 뒤 각 메소드를 호출한다.
 
 |method|desc|
 |------|---|
