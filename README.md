@@ -131,6 +131,12 @@ public HashServer getServer(HashKey key) {
 
 
 ### 사용방법
+#### 사전 준비
+서버로 사용되는 mongodb와 redis의 사용을 위해서 먼저 docker의 설치가 필요하다.  
+- [docker 다운로드](https://www.docker.com/products/docker-desktop/)
+- shell에 명령어 입력 : docker pull mongo, docker pull mongo
+
+
 #### 서버 구동 방법
 ``` yml
 hash:
@@ -144,13 +150,13 @@ server:
 
 ```
 
-위 yml 파일에서 정보를 바꾸어 실행하여 사용할 수 있다.
+위 yml 파일에서 필요한 설정을 한 뒤에 application을 실행하여 사용할 수 있다.
 - function: md5, custom
 - consistent: true(안정해시 사용), false(모듈러 해싱 사용)
 - node-nums: virtual node의 수를 선택
 - infra: mongo(가상 서버 개념), redis(실제 서버 사용)
 
-*redis 사용 시 docker 설치가 필요*
+
 
 #### API 사용
 API를 통한 사용은 서버를 실행한 후 아래 API를 호출하여 사용한다.
@@ -166,7 +172,26 @@ API를 통한 사용은 서버를 실행한 후 아래 API를 호출하여 사�
 
 #### 컴포넌트를 통한 사용(6장. 키값 저장소 설계 이후에 작성 예정입니다.)
 .jar 파일을 불러와 사용할 수 있다.
-consistentHashService를 불러온 뒤 각 메소드를 호출한다.
+
+해당 project를 jar로 빌드한 뒤 --- file을 경로에 저장한다.
+이후에 build.gradle에서 dependency에 다음과 같이 추가한뒤 library를 불러온다.
+
+``` gradle
+dependencies {
+    implementation files('libs/consistenthash-0.0.1-SNAPSHOT-plain.jar')
+}
+```
+이후 jar안의 빈을 사용하기 위해서 config class를 생성하여 프로젝트 안의 bean을 scan하여 사용한다.  
+
+``` java
+@Configuration
+@ComponentScan(basePackages = "com.zeromh.consistenthash")
+public class ConsistentConfig {
+}
+```
+
+
+다음엔 consistentHashService를 불러온 뒤 각 메소드를 호출한다.
 
 |method|desc|
 |------|---|
@@ -191,78 +216,11 @@ public class TestService {
 
 
 ### 테스트
-자세한 테스트 결과는 [5. 안정해시 테스트 결과](https://docs.google.com/spreadsheets/d/19TCaYxdEXc0qGslYcfGyjHuE0nQaXxMYe5e_cXF5M88/edit?usp=sharing)에서 확인할 수 있다.  
+자세한 테스트 결과는 [5. 안정해시 테스트 결과](https://0manhour.notion.site/5-f140c258a5e94093bfa9f5953de168d8?pvs=4)에서 확인할 수 있다.  
 
-#### Test Set
-- 테스트 서버의 기본값: 4개  
-    - server의 이름은 server_{server.no}와 같으며,  virtual node의 수에 따라서 server_{server.no}{node.no}에 해시 알고리즘을 적용하여 해시값을 생성하였다.
-    - ex)"server_00", "server_01", "server_10", "server_11"  
-- key의 개수: 100만개
-    - key 값은 0부터 999999까지의 숫자를 String 형태로 바꾸어 사용하였다.
-    - ex) "0", "1", "2", ... ,"999999"
-- 해시 알고리즘: MD5
-    - MD5는 총 16byte이므로 간단하게 사용하기 위해 prefix 부터 4byte까지 잘라 사용하였다.
-- 안정 해시의 virutal node 수: 4개의 case  
-    - 1, 4, 10, 100개  
-
-위 테스트 설정을 토대로 안정 해시에 server를 생성하고, hash value를 적용하여 해시링에 위치하면 다음과 같다.
-
-<img src="https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/4d016a63-b8c2-48ec-ae09-9e942ec8b0bc" width="500"/>
-<img src="https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/0bba574e-be1f-402d-a2cb-ed092bde565b" width="500"/>
-<img src="https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/2be3e8fc-1524-457e-96af-7b81d6840e75" width="500"/>
-<img src="https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/6e1f3492-d11f-4e98-b5d1-92a8529f4a40" width="500"/>
+- 키 분포 확인(Modular, Consistent hash - virtual node 수 별)
+- 서버 down 시 Cache Hit Rate 비교
+- Server 추가/제거 시 Key 이동 시간 비교
 
 
-#### 키 분포 확인
-키 분포 확인을 위해 100만개의 key의 해시값을 계산한 후에 각각의 위치에 배치하였다.  
-모듈러 해싱의 경우, hash value % 4(서버의 수)를 통해 각 서버로 배치  
-안정 해싱의 경우, 각 서버의 hash value를 해시링에 위치 시킨후 key의 hash value가 가장 가까운 서버로 향하도록 하여 배치하였다.  
-![스크린샷 2024-06-09 오후 9 24 55](https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/6a243c77-0490-437e-9204-fa098993a5bc)
-
-각 해싱 알고리즘과 virtual node 수에 따른 키 분배의 결과는 위와 같다.  
-- 모듈러 해싱의 경우, 모든 hash value에 대해 모듈러 연산을 통해 값을 계산하기 때문에 key의 개수가 충분하다면, 고르게 분포되는 것을 예측할 수 있고, 결과 또한 4개의 서버가 약 25만개의 key를 나눠가진 것을 확인할 수 있다.  
-
-- 반면 안정 해싱의 경우에는 상대적으로 key의 분포가 고르지 못한 것을 확인할 수 있는데, 특히 virtual node 수가 1일 때는 0번 서버의 key가 매우 적은 것을 확인할 수 있다.  
-    - 0번 서버의 hash value(3,208,578,106)가 1번 서버의 hash value(3,172,837,842)와 매우 밀접해 있기 때문이다.
-    - 이로 인해 0번 서버는 (3,172,837,843 ~ 3,208,578,106, 35,740,264)의 hash value를 가진 key만 가져올 수 있기 때문이다.
-    - 이 비율은 전체 hash value가 4btye에서 나올 수 있는 4,294,967,295개 이므로 35,740,264/4,294,967,295 ~= 0.83%만을 차지한다.  
-- 이 것은 안정 해시의 단점을 보여주는 것인데, 이를 해결하기 위해서 virtual node의 개념을 도입하였고, node의 개수가 증가할 수록 key가 고르게 분포하는 것을 확인할 수 있다.  
-
-
-#### 서버 down 시 Cache Hit Rate  
-키 분포 확인 이후에 하나의 서버가 down 되었다 가정하고 cahce hit rate를 테스트하였다.  
-안정 해시/virtual node 1 일 때 key의 개수가 유독 적어 Server_3이 down 되었다 가정하였고, 나머지는 Server_0의 down으로 테스트하였다.  
-![스크린샷 2024-06-09 오후 9 41 03](https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/1d2a9b6e-6b19-49e7-8ab0-d73755df1a11)
-
-특정 서버 down 시의 cahce hit rate의 변화는 위와 같다.  
-- 모듈러 해싱의 경우 cahce miss의발생이 매우 증가하였다.
-    - 모든 key의 나머지 연산값이 변동되므로(hash value % 4 -> hash value % 3) 모든 key의 배치가 변화되었기 때문이다.
-    - 또한 각 서버들의 저장되어 있는 key 또한 
-- 반면 안정 해싱의 경우 virtual node의 수가 1일 경우를 제외하고는 서버 down에 대하여 안정적인 cahce hit rate을 유지한다.
-    - 안정 해시의 특성으로, 기존 서버가 가지고 있는 key는 계속 유지되기 때문이다. 이는 기존 key의 개수 cahce hit 수가 같다는 것에서 확인할 수 있다.
-    - down된 서버가 가지고 있던 key에 대해서만 cache miss가 발생하였고, 그 값의 크기가 cache hit rate의 가장 큰 변수이다.
-- virtual node 수가 1일 경우에는 Server_0,1은 cache hit rate 100%를 유지하며, down된 Server_3의 요청이 해시링에서 다음 서버인 Server_2로 간 것을 확인할 수 있다.  
-
-
-#### Server 추가/제거 시 Key 이동 시간 비교  
-책에서는 다루지 않은 내용이지만, Server가 추가/제거될 때 데이터의 보존이 중요할 경우 Rehash 과정을 거쳐 알맞은 위치로 key를 이동시켜야 한다.  
-이 과정에서 key 이동 시간에는 서비스를 중단시켜야 하므로, 서비스의 만족도의 큰 영향을 미칠 수 있기 때문에 각 분배 해싱의 key 이동 시간을 비교해보았다.  
-
-![스크린샷 2024-06-09 오후 9 48 20](https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/ee71c6c6-e46e-4811-99e0-7e51fc220cd1)
-
-논리적 서버인 mongodb와 물리적 서버인 redis로 테스트 한 결과는 위와 같으며, local에서 container를 사용하여 측정하였기 때문에, 실제 값이 얼마인지 보다는 상대적으로 소요된 숫자를 비교하였다. 
-- 모듈러 해싱의 경우 Server 추가/제거에 대해서 모두 높은 시간을 보인다.  
-- 안정 해싱의 경우 virtual node 수가 1일 때를 제외하고, Server 추가는 모듈러 해싱과 비슷하게, Server 제거는 모듈러 해싱에 비해 줄어든 모습을 보인다.  
-
-각 시간이 차이나는 원인은 rehash 과정을 거치는 키의 개수와 관련이 있다.  
-![스크린샷 2024-06-09 오후 9 50 31](https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/7c4b5de8-a48d-409f-81c0-45b0f7096c13)  
-위 표를 살펴보면 Server_4가 추가되기 전후로 key의 증감을 확인할 수 있는데, 모듈러 해싱은 키의 증감과 상관없이 1M 개의 데이터를 모두 rehash 해야하기 때문에 증가/제거 모두 오랜 시간이 소요된다.  
-반면 안정 해싱의 경우엔 추가의 rehash 대상이 되는 Server에 대해서만 key를 rehash하면 되므로 제거 시에는 Server_4에 대해서만 진행하게 되고, virtual node 수가 1일 경우에는 증가 시에도 Server_3에 대해서만 진행하면 되기 때문에 시간이 적게 소요된다.  
-
-### 특이사항
-테스트 결과에서 virtual node를 추가하는 것이 항상 좋은 결과를 나오게 하지만, 항상 그렇지만은 않다.  
-hash value를 통해서 특정 서버를 찾는 과정은 기본적으로 binary search에 기반하는데, 이 때의 시간 복잡도는 O(logN)이다.(모듈러 해싱은 O(1)이 소요된다.)  
-여기서 N은 (서버의 개수 x virtual node의 수)이며 virtual node의 수가 증가할 수록 key의 서버를 찾는데 걸리는 시간이 늘어난다는 것을 의미한다.  
-
-따라서 virtual node의 수를 선택할 때에는, 개수에 key의 분포 및 cache hit rate와 조회 속도의 trade-off를 고려하여 설정해야 한다.
 
