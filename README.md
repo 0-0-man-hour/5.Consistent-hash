@@ -1,7 +1,6 @@
 # 5. Consistent-hash
 
-5장 안정해시에 대한 구현 과제입니다.  
-notion: https://0manhour.notion.site/5-f140c258a5e94093bfa9f5953de168d8?pvs=4  
+5장 안정해시에 대한 구현 과제입니다. [Notion 정리: 5장 안정 해시](https://puffy-daisy-806.notion.site/5-eae2c7f73a744c8ca9a9545c80e13353?pvs=4)  
 담당자: 박상엽(park-sy)  
 
 |Week|Date|Desc|
@@ -30,10 +29,6 @@ notion: https://0manhour.notion.site/5-f140c258a5e94093bfa9f5953de168d8?pvs=4
             │       └── ServerManageService.java
             ├── domain
             │   ├── model
-            │   │   ├── hash
-            │   │   │   ├── CustomHashFunction.java
-            │   │   │   ├── HashFunction.java
-            │   │   │   └── MD5HashFunction.java
             │   │   ├── key
             │   │   │   └── HashKey.java
             │   │   └── server
@@ -47,10 +42,15 @@ notion: https://0manhour.notion.site/5-f140c258a5e94093bfa9f5953de168d8?pvs=4
             │   └── service
             │       └── hash
             │           ├── HashServicePort.java
+            │           ├── function
+            │           │   ├── CustomHashFunction.java
+            │           │   ├── HashFunction.java
+            │           │   └── MD5HashFunction.java
             │           └── impl
             │               ├── ConsistentHashAdapter.java
             │               └── ModularHashAdapter.java
             ├── interfaces
+            │   ├── ConsistentHashService.java
             │   ├── key
             │   │   ├── HashKeyRequestDto.java
             │   │   └── KeyController.java
@@ -170,53 +170,27 @@ API를 통한 사용은 서버를 실행한 후 아래 API를 호출하여 사�
 |DELETE|/consistenthash/key|key를 제거한다.|
 
 
-#### 컴포넌트를 통한 사용(6장. 키값 저장소 설계 이후에 작성 예정입니다.)
-.jar 파일을 불러와 사용할 수 있다.
-
-해당 project를 jar로 빌드한 뒤 --- file을 경로에 저장한다.
-이후에 build.gradle에서 dependency에 다음과 같이 추가한뒤 library를 불러온다.
+#### HashServicePort 사용
+1. 해당 프로젝트를 불러온 뒤에 ./graldew clean build -x test를 통해 build/libs/consistenthash-0.0.1-SNAPSHOT-plain.jar 파일을 생성한다.
+2. libs/consistenthash-0.0.1-SNAPSHOT-plain.jar 파일을 사용할 프로젝트에 저장한다.
+3. build.gradle에서 dependency에 다음과 같이 추가한뒤 library로 사용한다.
 
 ``` gradle
 dependencies {
     implementation files('libs/consistenthash-0.0.1-SNAPSHOT-plain.jar')
 }
 ```
-이후 jar안의 빈을 사용하기 위해서 config class를 생성하여 프로젝트 안의 bean을 scan하여 사용한다.  
+4. .jar안의 bean을 사용하기 위해서 config class를 생성하여 프로젝트 안의 bean을 scan하여 사용한다.  
 
 ``` java
 @Configuration
-@ComponentScan(basePackages = "com.zeromh.consistenthash")
-public class ConsistentConfig {
+@ComponentScan(value = "com.zeromh.consistenthash.domain.service")
+public class ConsistentHashConfig {
 }
 ```
-
-
-다음엔 consistentHashService를 불러온 뒤 각 메소드를 호출한다.
-
-|method|desc|
-|------|---|
-|ConsistentHashService.addServer()|server를 추가한다.|
-|ConsistentHashService.delServer()|server 제거한다.|
-|ConsistentHashService.getKey()|key를 조회한다.|
-|ConsistentHashService.addKey()|key를 추가한다.|
-|ConsistentHashService.delKey()|key를 제거한다.|
-
-``` java
-@Service
-@RequiredArgsConstructor
-public class TestService {
-    private final ConsistentHashService hashService;
-    
-    public void test() {
-        hashService.addServer("myServer");
-        hashService.delServer("myServer");
-    }
-}
-```
-
 
 ### 테스트
-자세한 테스트 결과는 [5. 안정해시 테스트 결과](https://0manhour.notion.site/5-f140c258a5e94093bfa9f5953de168d8?pvs=4)에서 확인할 수 있다.  
+자세한 테스트 결과는 [5. 안정해시 테스트 결과](https://puffy-daisy-806.notion.site/8383c7a7b29849b198e5ddeb8db997ca?pvs=4)에서 확인할 수 있다.  
 
 - 키 분포 확인(Modular, Consistent hash - virtual node 수 별)
 - 서버 down 시 Cache Hit Rate 비교
