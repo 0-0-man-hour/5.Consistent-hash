@@ -4,9 +4,8 @@ import com.zeromh.consistenthash.application.dto.ServerUpdateInfo;
 import com.zeromh.consistenthash.application.dto.ServerStatus;
 import com.zeromh.consistenthash.domain.model.key.HashKey;
 import com.zeromh.consistenthash.domain.model.server.HashServer;
-import com.zeromh.consistenthash.domain.model.hash.HashFunction;
+import com.zeromh.consistenthash.domain.service.hash.function.HashFunction;
 import com.zeromh.consistenthash.domain.service.hash.HashServicePort;
-import com.zeromh.consistenthash.util.DateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -36,6 +35,16 @@ public class ModularHashAdapter implements HashServicePort {
     }
 
     @Override
+    public long getNodeHash(HashKey key) {
+        return 0;
+    }
+
+    @Override
+    public ServerStatus getServerStatus() {
+        return null;
+    }
+
+    @Override
     public HashServer getServer(HashKey key) {
         if (serverNums == 0) return null;
         long hashKey = hashFunction.hash(key.getKey());
@@ -44,13 +53,8 @@ public class ModularHashAdapter implements HashServicePort {
     }
 
     @Override
-    public ServerUpdateInfo addServerInfo(ServerStatus serverStatus, String serverName) {
-        setServer(serverStatus);
+    public ServerUpdateInfo addServerInfo(HashServer server) {
         serverNums++;
-        HashServer server = HashServer.builder()
-                .name(serverName == null ? DateUtil.getNowDate() : serverName)
-                .hashValues(List.of((long) serverNums))
-                .build();
         serverMap.put(serverNums-1, server);
 
         return ServerUpdateInfo
@@ -62,7 +66,8 @@ public class ModularHashAdapter implements HashServicePort {
     }
 
     @Override
-    public ServerUpdateInfo deleteServerInfo(ServerStatus serverStatus, HashServer delServer) {
+    public ServerUpdateInfo deleteServerInfo(HashServer delServer) {
+        ServerStatus serverStatus = getServerStatus();
         List<HashServer> rehashServers = new ArrayList<>(serverStatus.getServerList());
         serverStatus.getServerList().removeIf(server -> server.getName().equals(delServer.getName()));
         setServer(serverStatus);
@@ -70,6 +75,11 @@ public class ModularHashAdapter implements HashServicePort {
         return ServerUpdateInfo.builder()
                 .rehashServer(rehashServers)
                 .build();
+    }
+
+    @Override
+    public List<HashServer> getReplicaServers(HashKey key, int n) {
+        return null;
     }
 
 

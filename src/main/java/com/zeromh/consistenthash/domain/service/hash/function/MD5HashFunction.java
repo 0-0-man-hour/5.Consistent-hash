@@ -1,6 +1,5 @@
-package com.zeromh.consistenthash.domain.model.hash;
+package com.zeromh.consistenthash.domain.service.hash.function;
 
-import com.zeromh.consistenthash.domain.model.hash.HashFunction;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 

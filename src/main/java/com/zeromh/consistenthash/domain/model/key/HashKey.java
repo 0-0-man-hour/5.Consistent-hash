@@ -14,6 +14,8 @@ public class HashKey {
     private String key;
     @Setter
     long hashVal;
+    @Setter
+    long serverHash;
 
     @Override
     public int hashCode() {

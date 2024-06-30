@@ -11,14 +11,16 @@ import java.util.List;
 import java.util.Objects;
 
 @Getter
+@Setter
 @Builder
 @ToString
 @Document
 public class HashServer {
     @Id
     String name;
-
-    @Setter
+    String url;
+    String port;
+    int numsOfNode;
     List<Long> hashValues;
     @Override
     public boolean equals(Object o) {

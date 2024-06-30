@@ -14,7 +14,7 @@ public class ServerController {
 
     @PostMapping
     public ServerStatus addServer(@RequestBody ServerRequestDto requestDto) {
-        return serverManageUseCase.addServer(requestDto.getServerName());
+        return serverManageUseCase.addServer(requestDto.toHashServer());
     }
 
     @DeleteMapping

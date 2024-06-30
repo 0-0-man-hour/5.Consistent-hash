@@ -97,7 +97,7 @@ class ServerManageServiceTest {
         int serverNums = 5;
         ServerStatus serverStatus = null;
         for (int i = 0; i < serverNums; i++) {
-            serverStatus = serverManageService.addServer("server_"+i);
+            serverStatus = serverManageService.addServer(HashServer.builder().name("server_"+i).build());
         }
 
         for (int i = 0; i < 100; i++) {
@@ -123,7 +123,7 @@ class ServerManageServiceTest {
 
         if (serverStatus.getServerNums() == 0) {
             for (int i = 0; i < serverNums; i++) {
-                serverStatus = serverManageService.addServer("server_"+i);
+                serverStatus = serverManageService.addServer(HashServer.builder().name("server_"+i).build());
             }
             for (int i = 0; i < 1000000; i++) {
                 keyManageService.addKey(HashKey.builder()
@@ -165,7 +165,7 @@ class ServerManageServiceTest {
         int serverNums = 4;
         ServerStatus serverStatus = null;
         for (int i = 0; i < serverNums; i++) {
-            serverStatus = serverManageService.addServer("server_"+i);
+            serverStatus = serverManageService.addServer(HashServer.builder().name("server_"+i).build());
         }
 
         for (int i = 0; i < 1000000; i++) {
@@ -176,10 +176,10 @@ class ServerManageServiceTest {
                     .key(String.valueOf(i)).build());
         }
 
-        String new_server = "server_4";
+        HashServer newServer = HashServer.builder().name("server_4").build();
 
         long addStart = System.currentTimeMillis();
-        serverStatus = serverManageService.addServer(new_server);
+        serverStatus = serverManageService.addServer(newServer);
 
         log.info("add rehash work time: {}", System.currentTimeMillis() - addStart);
         for (var server : serverStatus.getServerList()) {
@@ -187,8 +187,7 @@ class ServerManageServiceTest {
         }
 
         long removeStart = System.currentTimeMillis();
-        serverStatus = serverManageService.deleteServer(HashServer.builder()
-                .name(new_server).build());
+        serverStatus = serverManageService.deleteServer(newServer);
 
         log.info("remove rehash work time: {}", System.currentTimeMillis() - removeStart);
         for (var server : serverStatus.getServerList()) {
@@ -201,7 +200,7 @@ class ServerManageServiceTest {
     @Test
     void serverAdd_rehash_test() {
         long start = System.currentTimeMillis();
-        ServerStatus serverStatus = serverManageService.addServer("server_"+4);
+        ServerStatus serverStatus = serverManageService.addServer(HashServer.builder().name("server_"+4).build());
 
         log.info("add rehash work time: {}", System.currentTimeMillis() - start);
         for (var server : serverStatus.getServerList()) {
