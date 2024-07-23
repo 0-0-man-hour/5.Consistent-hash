@@ -134,7 +134,7 @@ public HashServer getServer(HashKey key) {
 #### 사전 준비
 서버로 사용되는 mongodb와 redis의 사용을 위해서 먼저 docker의 설치가 필요하다.  
 - [docker 다운로드](https://www.docker.com/products/docker-desktop/)
-- shell에 명령어 입력 : docker pull mongo, docker pull mongo
+- shell에 명령어 입력 : docker pull mongo, docker pull redis
 
 
 #### 서버 구동 방법
