@@ -15,7 +15,9 @@ public class HashKey {
     @Setter
     long hashVal;
     @Setter
-    long serverHash;
+    Long serverHash;
+    @Setter
+    Long prevServerHash;
 
     @Override
     public int hashCode() {

@@ -22,6 +22,8 @@ public class HashServer {
     String port;
     int numsOfNode;
     List<Long> hashValues;
+    boolean isAlive;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

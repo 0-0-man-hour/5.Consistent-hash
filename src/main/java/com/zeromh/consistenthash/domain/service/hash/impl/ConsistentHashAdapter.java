@@ -1,5 +1,6 @@
 package com.zeromh.consistenthash.domain.service.hash.impl;
 
+import com.zeromh.consistenthash.application.dto.HashServerDto;
 import com.zeromh.consistenthash.application.dto.ServerUpdateInfo;
 import com.zeromh.consistenthash.application.dto.ServerStatus;
 import com.zeromh.consistenthash.domain.model.key.HashKey;
@@ -28,9 +29,9 @@ public class ConsistentHashAdapter implements HashServicePort {
     SortedMap<Long, HashServer> ring = new TreeMap<>();
 
     @Override
-    public void setServer(ServerStatus serverStatus) {
-        this.ring =  serverStatus.getServerList().stream()
-                .flatMap(server -> IntStream.range(0, defaultNodeNums)
+    public void setServer(List<HashServer> serverList) {
+        this.ring =  serverList.stream()
+                .flatMap(server -> IntStream.range(0, server.getNumsOfNode())
                         .mapToObj(i -> new AbstractMap.SimpleEntry<>(
                                 hashFunction.hash(server.getName() + i),
                                 server)))
@@ -40,6 +41,13 @@ public class ConsistentHashAdapter implements HashServicePort {
                         (k1, k2) -> k2,
                         TreeMap::new
                 ));
+    }
+
+    @Override
+    public List<Long> getServerHashes(HashServer hashServer) {
+        return IntStream.range(0, hashServer.getNumsOfNode())
+                .mapToObj(i -> hashFunction.hash(hashServer.getName() + i))
+                .toList();
     }
 
     @Override
@@ -58,6 +66,7 @@ public class ConsistentHashAdapter implements HashServicePort {
 
         return hash;
     }
+
     public ServerStatus getServerStatus() {
         List<HashServer> hashServerList = ring.values().stream().toList();
         return ServerStatus.builder()
@@ -126,38 +135,103 @@ public class ConsistentHashAdapter implements HashServicePort {
     }
 
     @Override
-    public List<HashServer> getReplicaServers(HashKey key, int n) {
+    public List<HashServer> getServers(HashKey key, int n) {
         if (ring.isEmpty()) {
             return null;
         }
-        n = n+1;
         long hash = hashFunction.hash(key.getKey());
         key.setHashVal(hash);
 
-        Set<HashServer> replicaServers = new HashSet<>();
+        Set<HashServer> replicaServers = new LinkedHashSet<>();
 
         SortedMap<Long, HashServer> tailMap = ring.tailMap(hash);
         hash = tailMap.isEmpty() ? ring.firstKey() : tailMap.firstKey();
         key.setServerHash(hash);
-
-        HashServer responseServer = ring.get(hash);
-
         Iterator<Map.Entry<Long, HashServer>> iterator = tailMap.isEmpty() ? ring.entrySet().iterator() : tailMap.entrySet().iterator();
 
         while (iterator.hasNext() && replicaServers.size() < n) {
-            Map.Entry<Long, HashServer> entry = iterator.next();
-            replicaServers.add(entry.getValue());
+            HashServer server = iterator.next().getValue();
+            replicaServers.add(server);
         }
 
         if (replicaServers.size() < n) {
             iterator = ring.entrySet().iterator();
             while (iterator.hasNext() && replicaServers.size() < n) {
-                Map.Entry<Long, HashServer> entry = iterator.next();
-                replicaServers.add(entry.getValue());
+                HashServer server = iterator.next().getValue();
+                replicaServers.add(server);
             }
         }
 
-        replicaServers.remove(responseServer);
+        return replicaServers.stream().toList();
+    }
+
+    @Override
+    public List<HashServerDto> getAliveServers(HashKey key, int n) {
+        if (ring.isEmpty()) {
+            return null;
+        }
+        long hash = hashFunction.hash(key.getKey());
+        key.setHashVal(hash);
+
+        Set<HashServer> replicaServers = new LinkedHashSet<>();
+        Set<HashServer> failureServers = new LinkedHashSet<>();
+
+        SortedMap<Long, HashServer> tailMap = ring.tailMap(hash);
+        Iterator<Map.Entry<Long, HashServer>> iterator = tailMap.isEmpty() ? ring.entrySet().iterator() : tailMap.entrySet().iterator();
+
+        key.setServerHash(ring.tailMap(hash).firstKey() == null ? ring.firstKey() : ring.tailMap(hash).firstKey());
+        key.setPrevServerHash(ring.headMap(hash).lastKey() == null ? ring.lastKey() : ring.headMap(hash).lastKey());
+
+        while (iterator.hasNext() && replicaServers.size() < n) {
+            HashServer server = iterator.next().getValue();
+            if (!server.isAlive()) {
+                failureServers.add(server);
+            } else {
+                replicaServers.add(server);
+            }
+        }
+
+        if (replicaServers.size() < n) {
+            iterator = ring.entrySet().iterator();
+            while (iterator.hasNext() && replicaServers.size() < n) {
+                HashServer server = iterator.next().getValue();
+                if (!server.isAlive()) {
+                    failureServers.add(server);
+                } else {
+                    replicaServers.add(server);
+                }
+            }
+        }
+
+        List<HashServerDto> targetServers = replicaServers.stream().map(HashServerDto::new).toList();
+        if (!failureServers.isEmpty()) {
+            List<HashServer> failureServerList = failureServers.stream().toList();
+            for (int i = 0; i < failureServerList.size(); i++) {
+                targetServers.get(targetServers.size() - failureServerList.size() + i).setFailureServer(failureServerList.get(i));
+            }
+        }
+        return targetServers;
+    }
+
+    @Override
+    public List<HashServer> getServersFromHash(Long hash, int n) {
+        SortedMap<Long, HashServer> tailMap = ring.tailMap(hash);
+        Iterator<Map.Entry<Long, HashServer>> iterator = tailMap.isEmpty() ? ring.entrySet().iterator() : tailMap.entrySet().iterator();
+        Set<HashServer> replicaServers = new LinkedHashSet<>();
+
+        while (iterator.hasNext() && replicaServers.size() < n) {
+            HashServer server = iterator.next().getValue();
+            replicaServers.add(server);
+        }
+
+        if (replicaServers.size() < n) {
+            iterator = ring.entrySet().iterator();
+            while (iterator.hasNext() && replicaServers.size() < n) {
+                HashServer server = iterator.next().getValue();
+                replicaServers.add(server);
+            }
+        }
+
         return replicaServers.stream().toList();
     }
 

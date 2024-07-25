@@ -1,5 +1,6 @@
 package com.zeromh.consistenthash.domain.service.hash.impl;
 
+import com.zeromh.consistenthash.application.dto.HashServerDto;
 import com.zeromh.consistenthash.application.dto.ServerUpdateInfo;
 import com.zeromh.consistenthash.application.dto.ServerStatus;
 import com.zeromh.consistenthash.domain.model.key.HashKey;
@@ -23,15 +24,18 @@ public class ModularHashAdapter implements HashServicePort {
     private int serverNums;
 
     @Override
-    public void setServer(ServerStatus serverStatus) {
+    public void setServer(List<HashServer> serverList) {
         serverMap = new HashMap<>();
-        List<HashServer> servers = serverStatus.getServerList();
-        serverNums = servers.size();
+        serverNums = serverList.size();
         for (int i = 0; i < serverNums; i++) {
-            serverMap.put(i, servers.get(i));
-            servers.get(i).setHashValues(List.of((long) i));
-
+            serverMap.put(i, serverList.get(i));
+            serverList.get(i).setHashValues(List.of((long) i));
         }
+    }
+
+    @Override
+    public List<Long> getServerHashes(HashServer hashServer) {
+        return null;
     }
 
     @Override
@@ -70,7 +74,7 @@ public class ModularHashAdapter implements HashServicePort {
         ServerStatus serverStatus = getServerStatus();
         List<HashServer> rehashServers = new ArrayList<>(serverStatus.getServerList());
         serverStatus.getServerList().removeIf(server -> server.getName().equals(delServer.getName()));
-        setServer(serverStatus);
+        setServer(rehashServers);
 
         return ServerUpdateInfo.builder()
                 .rehashServer(rehashServers)
@@ -78,7 +82,17 @@ public class ModularHashAdapter implements HashServicePort {
     }
 
     @Override
-    public List<HashServer> getReplicaServers(HashKey key, int n) {
+    public List<HashServer> getServers(HashKey key, int n) {
+        return null;
+    }
+
+    @Override
+    public List<HashServerDto> getAliveServers(HashKey key, int n) {
+        return null;
+    }
+
+    @Override
+    public List<HashServer> getServersFromHash(Long hash, int n) {
         return null;
     }
 

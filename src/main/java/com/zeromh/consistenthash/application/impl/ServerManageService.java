@@ -27,7 +27,7 @@ public class ServerManageService implements ServerManageUseCase {
     @Override
     public ServerStatus addServer(HashServer hashServer) {
         ServerStatus serverStatus = serverPort.getServerStatus();
-        hashServicePort.setServer(serverStatus);
+        hashServicePort.setServer(serverStatus.getServerList());
 
         ServerUpdateInfo updateInfo = hashServicePort.addServerInfo(hashServer);
         serverStatus = serverPort.addServer(updateInfo.getNewServer());
@@ -44,7 +44,7 @@ public class ServerManageService implements ServerManageUseCase {
         ServerStatus serverStatus = serverPort.getServerStatus();
         if (serverStatus.getServerNums() < 2) throw new RuntimeException("서버가 1개 이하이므로 삭제할 수 없습니다.");
 
-        hashServicePort.setServer(serverStatus);
+        hashServicePort.setServer(serverStatus.getServerList());
         ServerUpdateInfo updateInfo = hashServicePort.deleteServerInfo(hashServer);
 
         rehashServerAll(updateInfo.getRehashServer());

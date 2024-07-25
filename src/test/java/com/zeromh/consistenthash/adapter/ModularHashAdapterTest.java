@@ -34,7 +34,7 @@ class ModularHashAdapterTest {
                 .serverList(serverList)
                 .build();
 
-        modularHashAdapter.setServer(serverStatus);
+        modularHashAdapter.setServer(serverList);
 
         String key = "test";
         int serverIndex = (int) (hashFunction.hash("test") % serverNum);

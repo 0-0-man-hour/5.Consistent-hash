@@ -44,7 +44,7 @@ public class KeyManageService implements KeyManageUseCase {
     private HashServer getSever(HashKey key) {
         HashServer targetServer = hashServicePort.getServer(key);
         if (targetServer == null) {
-            hashServicePort.setServer(serverPort.getServerStatus());
+            hashServicePort.setServer(serverPort.getServerStatus().getServerList());
             targetServer = hashServicePort.getServer(key);
         }
         return targetServer;
