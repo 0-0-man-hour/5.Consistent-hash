@@ -30,7 +30,7 @@ server:
 ```
 
 ### 주요 기능
-- 안정 해시를 통한 서버/키 설정
+#### 안정 해시를 통한 서버/키 설정
 ``` java
 public HashServer getServer(HashKey key) {
     if (ring.isEmpty()) {
@@ -51,7 +51,7 @@ public HashServer getServer(HashKey key) {
 서버의 상태를 map에 저장하고, 조회 시에 tailMap을 통해 현재 value로 부터 가장 가까운 위치의 서버를 반환한다.  
 [Consistent Hashing](https://tom-e-white.com/2007/11/consistent-hashing.html) 사이트를 참고하여 구현하였다. 
 
-- 서버 추가  
+#### 서버 추가  
 
 서버의 추가는 server를 해시링에 등록하고, 외부 서버를 생성하여, key를 저장할 수 있도록 한다.
 1. 서버의 추가는 server의 이름을 해시 알고리즘을 통해 hashvalue를 계산한 후에 해시링에 배치한다.
@@ -63,7 +63,7 @@ public HashServer getServer(HashKey key) {
     ![redis](https://github.com/0-0-man-hour/5.Consistent-hash/assets/53611554/65f208d9-99ae-4c7a-b13d-ffea1132fe8b)
 3. rehash를 체크한 경우에 기존에 저장된 key들의 rehash가 이루어진다.
   
-- 서버 제거
+#### 서버 제거
 
 서버의 제거는 해시링에 등록된 server 정보를 제거하고, 외부 서버를 제거한다.
 1. 서버의 제거는 해시링에 배치된 서버의 데이터를 제거한다.
@@ -72,7 +72,7 @@ public HashServer getServer(HashKey key) {
     2-2. redis의 경우 server 이름 기반의 컨테이너를 제거한다.
 3. rehash를 체크한 경우 삭제 대상의 서버의 key를 rehahs하여 재배치한다.
   
-- 키 추가/제거
+#### 키 추가/제거
 
 키 추가는 키의 hash value를 통해서 가장 가까운 위치의 서버를 찾고, 그 서버에 데이터를 저장/제거한다.
 1. key의 hash value를 계산하여 getServer() 메소드를 호출한다.
